@@ -1,6 +1,7 @@
 package com.pokemonreview.api.service.impl;
 
 import com.pokemonreview.api.dto.PokemonDTO;
+import com.pokemonreview.api.exceptions.PokemonNotFoundException;
 import com.pokemonreview.api.models.PokemonEntity;
 import com.pokemonreview.api.repository.PokemonRepository;
 import com.pokemonreview.api.service.PokemonService;
@@ -37,6 +38,29 @@ public class PokemonServiceImpl implements PokemonService {
     public List<PokemonDTO> getAllPokemon() {
         List<PokemonEntity> pokemon = pokemonRepository.findAll();
         return pokemon.stream().map(p -> mapToDTO(p)).collect(Collectors.toList());
+    }
+
+    @Override
+    public PokemonDTO getPokemonById(int id) {
+        PokemonEntity pokemon = pokemonRepository.findById(id).orElseThrow(() -> new PokemonNotFoundException("Pokemon could not be found"));
+        return mapToDTO(pokemon);
+    }
+
+    @Override
+    public PokemonDTO updatePokemon(PokemonDTO pokemonDTO, int id) {
+        PokemonEntity pokemon = pokemonRepository.findById(id).orElseThrow(() -> new PokemonNotFoundException("Pokemon could not be updated"));
+
+        pokemon.setName(pokemonDTO.getName());
+        pokemon.setType(pokemon.getType());
+
+        PokemonEntity updatedPokemon = pokemonRepository.save(pokemon);
+        return mapToDTO(updatedPokemon);
+    }
+
+    @Override
+    public void deletePokemon(int id) {
+        PokemonEntity pokemon = pokemonRepository.findById(id).orElseThrow(() -> new PokemonNotFoundException("Pokemon could not be deleted"));
+        pokemonRepository.delete(pokemon);
     }
 
     private PokemonDTO mapToDTO(PokemonEntity pokemon){
