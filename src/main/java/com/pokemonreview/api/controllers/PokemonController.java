@@ -23,12 +23,8 @@ public class PokemonController {
     }
 
     @GetMapping("pokemon")
-    public ResponseEntity<List<PokemonEntity>> getPokemons(){
-        List<PokemonEntity> pokemons = new ArrayList<>();
-        pokemons.add(new PokemonEntity(1, "Squirtle", "Water"));
-        pokemons.add(new PokemonEntity(2, "Pikachu", "Electric"));
-        pokemons.add(new PokemonEntity(3, "Charmander", "Fire"));
-        return ResponseEntity.ok(pokemons);
+    public ResponseEntity<List<PokemonDTO>> getPokemons(){
+        return new ResponseEntity<>(pokemonService.getAllPokemon(), HttpStatus.OK);
     }
 
     @GetMapping("pokemon/{id}")
