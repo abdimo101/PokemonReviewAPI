@@ -3,6 +3,7 @@ package com.pokemonreview.api.service.impl;
 import com.pokemonreview.api.dto.PokemonDTO;
 import com.pokemonreview.api.dto.ReviewDTO;
 import com.pokemonreview.api.exceptions.PokemonNotFoundException;
+import com.pokemonreview.api.exceptions.ReviewNotFoundException;
 import com.pokemonreview.api.models.PokemonEntity;
 import com.pokemonreview.api.models.ReviewEntity;
 import com.pokemonreview.api.repository.PokemonRepository;
@@ -43,6 +44,50 @@ public class ReviewServiceImpl implements ReviewService {
     public List<ReviewDTO> getReviewsByPokemonId(int id) {
         List<ReviewEntity> reviews = reviewRepository.findByPokemonId(id);
         return reviews.stream().map(review -> mapToDTO(review)).collect(Collectors.toList());
+    }
+
+    @Override
+    public ReviewDTO getReviewById(int pokemonId, int reviewId) {
+        PokemonEntity pokemon = pokemonRepository.findById(pokemonId).orElseThrow(() -> new PokemonNotFoundException("Pokemon could not be found"));
+
+        ReviewEntity review = reviewRepository.findById(reviewId).orElseThrow(() -> new ReviewNotFoundException("Review could not be found"));
+
+        if(review.getPokemon().getId() != pokemon.getId()) {
+            throw new ReviewNotFoundException("This review does not belong to a pokemon");
+        }
+        return mapToDTO(review);
+    }
+
+    @Override
+    public ReviewDTO updateReview(int pokemonId, int reviewId, ReviewDTO reviewDTO) {
+        PokemonEntity pokemon = pokemonRepository.findById(pokemonId).orElseThrow(() -> new PokemonNotFoundException("Pokemon could not be found"));
+
+        ReviewEntity review = reviewRepository.findById(reviewId).orElseThrow(() -> new ReviewNotFoundException("Review could not be found"));
+
+        if(review.getPokemon().getId() != pokemon.getId()) {
+            throw new ReviewNotFoundException("This review does not belong to a pokemon");
+        }
+
+        review.setTitle(reviewDTO.getTitle());
+        review.setContent(reviewDTO.getContent());
+        review.setStars(reviewDTO.getStars());
+
+        ReviewEntity updateReview = reviewRepository.save(review);
+
+        return mapToDTO(updateReview);
+    }
+
+    @Override
+    public void deleteReview(int pokemonId, int reviewId) {
+        PokemonEntity pokemon = pokemonRepository.findById(pokemonId).orElseThrow(() -> new PokemonNotFoundException("Pokemon could not be found"));
+
+        ReviewEntity review = reviewRepository.findById(reviewId).orElseThrow(() -> new ReviewNotFoundException("Review could not be found"));
+
+        if(review.getPokemon().getId() != pokemon.getId()) {
+            throw new ReviewNotFoundException("This review does not belong to a pokemon");
+        }
+
+        reviewRepository.delete(review);
     }
 
     private ReviewDTO mapToDTO(ReviewEntity review){
